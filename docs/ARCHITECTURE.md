@@ -41,6 +41,11 @@
 │     ├─ 17-menus.js           settings + menus + panel
 │     ├─ 18-game.js            state machine, waves, extraction, scoring
 │     └─ 19-boot.js            boot sequence, error surface, main loop
+├─ electron/
+│  ├─ main.cjs                 desktop window, menu, custom protocol, CSP
+│  └─ preload.cjs              sandboxed desktop bridge
+├─ build/
+│  └─ README.md                icon/build-resource notes
 ├─ scripts/
 │  ├─ build.mjs                minify + emit multi-file and single-file builds
 │  ├─ dev.mjs                  tiny static dev server
@@ -175,6 +180,69 @@ Search for these strings to jump to the relevant source file:
 Global debug handles: `window.__G`, `window.__stats()`, `window.__ready`,
 `window.__fatal`, `window.__errors`, `window.__frames`, `window.__setShot()`.
 
+## Desktop shell (Electron)
+
+The desktop build is a thin Electron wrapper around the existing multi-file web
+build. The game itself is unchanged.
+
+```text
+electron/main.cjs
+  ├─ single-instance lock
+  ├─ registers saltline:// as a privileged, secure custom scheme
+  ├─ creates a 1600x900 BrowserWindow (min 960x600)
+  ├─ loads saltline://app/index.html from dist/
+  ├─ applies CSP + fullscreen/pointer-lock permissions
+  ├─ native menu: fullscreen, zoom, reload/devtools (dev), GitHub help
+  └─ denies navigation, popups and webviews
+
+electron/preload.cjs
+  └─ exposes window.saltlineDesktop = {
+       isDesktop, platform, versions,
+       toggleFullscreen()
+     }
+```
+
+Security baseline:
+
+- `contextIsolation: true`
+- `sandbox: true`
+- `nodeIntegration: false`
+- custom protocol restricted to `dist/` (path traversal rejected)
+- navigation limited to the app origin
+- `setWindowOpenHandler` denies popups
+- CSP on the game document; Google Fonts is the only allowed external origin
+
+Development:
+
+```sh
+npm run electron:dev
+```
+
+Load the web dev server inside Electron:
+
+```sh
+npm run dev
+SALTLINE_DEV_URL=http://localhost:8731 npm run electron:serve
+```
+
+Packaging:
+
+```sh
+npm run electron:pack      # release/<platform>-<arch>/Saltline.app
+npm run electron:dist      # platform installer(s)
+```
+
+`scripts/electron-builder.mjs` reuses the locally installed Electron distribution
+when the target platform matches the host, so packaging does not re-download the
+runtime. Cross-platform targets fall back to Electron Builder's normal download.
+Targets are declared per platform. Release builds should run on their target OS
+(or in a matching CI runner) because Windows/Linux installers may need Wine,
+Docker, fpm or similar tooling when cross-built from macOS.
+
+The first installer build also downloads Electron Builder helper binaries
+(`7zip`, `dmg-builder`) into the user cache. If that is blocked, `--dir` packaging
+still produces a runnable app.
+
 ## Verification
 
 `npm run check` validates the file order and both JS/CSS syntax.
@@ -187,3 +255,7 @@ The build was smoke-tested in headless Chromium with SwiftShader:
   identical)
 - `dist/single/index.html`: boots to `title`, no page errors
 - `?autostart=1`: reaches `playing`, 3 relays, 3 enemies, HUD visible
+- Electron dev run: `saltline://app/index.html` boots to `title`, preload bridge
+  present, localStorage working, no CSP violations
+- Electron packaged run (`release/mac-arm64/Saltline.app`): same result
+- Electron gameplay: `playing`, 3 relays, 3 enemies, HUD visible, audio present

@@ -61,8 +61,26 @@ async function main() {
   ).join("\n");
   await transform(css, { loader: "css", target: ["es2020"] });
 
+  for (const rel of [
+    "electron/main.cjs",
+    "electron/preload.cjs",
+    "scripts/electron-builder.mjs",
+  ]) {
+    const code = await readFile(path.join(root, rel), "utf8");
+    await transform(code, { loader: "js", target: ["node20"] });
+  }
+
+  const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
+  try {
+    await access(path.join(root, pkg.main));
+  } catch {
+    fail(`package.json main does not exist: ${pkg.main}`);
+  }
+
   if (!process.exitCode) {
-    console.log(`ok: ${expected.length} JS files, ${STYLE_FILES.length} CSS files, syntax valid`);
+    console.log(
+      `ok: ${expected.length} JS files, ${STYLE_FILES.length} CSS files, electron entry, syntax valid`,
+    );
   }
 }
 

@@ -3,15 +3,68 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Saltline browser FPS — multi-file source layout with single-file and multi-file builds",
+  "main": "electron/main.cjs",
+  "description": "Saltline browser FPS — multi-file source, single-file web build, and Electron desktop app",
+  "author": "Saltline mirror contributors",
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "node scripts/build.mjs",
     "build:single": "node scripts/build.mjs --single-only",
     "preview": "node scripts/dev.mjs dist 8731",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "electron:dev": "npm run build && electron . --dev",
+    "electron:serve": "electron . --dev",
+    "electron:pack": "npm run build && node scripts/electron-builder.mjs --dir",
+    "electron:dist": "npm run build && node scripts/electron-builder.mjs",
+    "electron:dist:mac": "npm run build && node scripts/electron-builder.mjs --mac",
+    "electron:dist:win": "npm run build && node scripts/electron-builder.mjs --win",
+    "electron:dist:linux": "npm run build && node scripts/electron-builder.mjs --linux"
   },
   "devDependencies": {
+    "electron": "^45.3.1",
+    "electron-builder": "^26.18.0",
     "esbuild": "^0.25.0"
+  },
+  "build": {
+    "appId": "io.github.realcodebear.saltline",
+    "productName": "Saltline",
+    "asar": true,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "dist/index.html",
+      "dist/styles.css",
+      "dist/game.js",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.games",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "category": "Game",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
   }
 }
