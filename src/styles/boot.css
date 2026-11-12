@@ -1,0 +1,10 @@
+/* Saltline — boot screen and fatal-error panel */
+/* ---- boot ---- */
+#boot { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--ink); transition: opacity .6s ease; z-index: 50;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#boot.done { opacity: 0; pointer-events: none; }
+.boot-mark { font-family: var(--f-display); font-weight: 900; font-size: clamp(40px, 9vw, 96px); letter-spacing: .16em; margin-right: -.16em; color: var(--bone); line-height: 1; }
+.boot-sub { font-family: var(--f-mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--steel); text-align: center; }
+.boot-bar { width: min(320px, 70vw); height: 2px; background: #23282c; }
+.boot-bar i { display: block; height: 100%; width: 0%; background: var(--signal); transition: width .25s ease; }
+#fatal { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + var(--sab)) max(16px, env(safe-area-inset-left, 0px)); font: 12px/1.4 var(--f-mono); color: #ffb4a8; background: rgba(40, 8, 4, .85); white-space: pre-wrap; z-index: 99; max-height: 40%; overflow: auto; pointer-events: auto; -webkit-user-select: text; user-select: text; }

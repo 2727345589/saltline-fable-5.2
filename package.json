@@ -1,0 +1,17 @@
+{
+  "name": "saltline-fable-5.2",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Saltline browser FPS — multi-file source layout with single-file and multi-file builds",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "build:single": "node scripts/build.mjs --single-only",
+    "preview": "node scripts/dev.mjs dist 8731",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

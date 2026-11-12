@@ -1,0 +1,7 @@
+/* Saltline — prefers-reduced-motion overrides */
+/* ---- motion preferences ---- */
+@media (prefers-reduced-motion: reduce) {
+  .menu *, .hud *, .comms, .loc-card, .loc-card *, #boot, .m-bars i { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .h-warn.on { animation: none; opacity: 1; }
+  .h-cue.urgent { animation: none; }
+}
