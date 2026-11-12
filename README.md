@@ -113,10 +113,26 @@ portable (Windows), AppImage + deb (Linux). Cross-building Windows/Linux
 installers from macOS may require additional platform tooling (for example Wine
 or Docker), so use the matching platform in CI for release builds.
 
-The first installer build downloads Electron Builder's helper binaries
-(`7zip`, `dmg-builder`) into `~/Library/Caches/electron-builder`. If that network
-request is blocked, `npm run electron:pack` still produces a runnable unpacked
-app in `release/`.
+`electron:dist` first checks whether GitHub's Electron Builder release downloads
+are reachable. If they are blocked, it automatically falls back to the npmmirror
+binary mirror. The helper binaries (`7zip`, `dmg-builder`) are cached in
+`~/Library/Caches/electron-builder` after the first successful build.
+
+You can override the behavior:
+
+```sh
+# use a specific mirror
+ELECTRON_BUILDER_BINARIES_MIRROR=https://your-mirror.example/electron-builder-binaries/ npm run electron:dist
+
+# or the project-specific alias
+SALTLINE_ELECTRON_BUILDER_MIRROR=https://your-mirror.example/electron-builder-binaries/ npm run electron:dist
+
+# skip the connectivity probe
+SALTLINE_SKIP_NETWORK_CHECK=1 npm run electron:dist
+```
+
+If neither GitHub nor the fallback mirror is reachable, `npm run electron:pack`
+still produces a runnable unpacked app in `release/`.
 
 Builds are unsigned by default, so macOS Gatekeeper may require a local override
 until a Developer ID certificate is configured. For distribution, set
