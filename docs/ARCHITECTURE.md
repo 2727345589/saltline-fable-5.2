@@ -239,9 +239,18 @@ Targets are declared per platform. Release builds should run on their target OS
 (or in a matching CI runner) because Windows/Linux installers may need Wine,
 Docker, fpm or similar tooling when cross-built from macOS.
 
-The first installer build also downloads Electron Builder helper binaries
-(`7zip`, `dmg-builder`) into the user cache. If that is blocked, `--dir` packaging
-still produces a runnable app.
+Installer builds need Electron Builder helper binaries (`7zip`, `dmg-builder`).
+`scripts/electron-builder.mjs` probes GitHub's release download host first and
+falls back to `https://npmmirror.com/mirrors/electron-builder-binaries/` when it
+is unreachable. The check is skipped for `--dir` packaging and can be controlled
+with:
+
+- `ELECTRON_BUILDER_BINARIES_MIRROR` — standard Electron Builder mirror variable
+- `SALTLINE_ELECTRON_BUILDER_MIRROR` — project-specific alias
+- `SALTLINE_SKIP_NETWORK_CHECK=1` — skip the probe
+
+Downloaded tools are cached in `~/Library/Caches/electron-builder`. If no source
+is reachable, `--dir` packaging still produces a runnable app.
 
 ## Verification
 
